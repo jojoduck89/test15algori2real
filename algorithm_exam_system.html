@@ -1,0 +1,358 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+#app { padding: 1rem 0; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.hero { text-align: center; padding: 2rem 1rem; }
+.hero h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.5rem; }
+.hero p { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+
+.topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 1rem 0 1.5rem; }
+.topic-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; cursor: pointer; transition: border-color 0.15s; }
+.topic-card:hover { border-color: var(--color-border-primary); }
+.topic-card.selected { border: 2px solid #7F77DD; }
+.topic-card .t-num { font-size: 11px; color: #7F77DD; font-weight: 500; margin-bottom: 4px; }
+.topic-card .t-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.topic-card .t-count { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.btn { padding: 8px 20px; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); transition: background 0.15s; }
+.btn:hover { background: var(--color-background-secondary); }
+.btn.primary { background: #7F77DD; color: #fff; border-color: #7F77DD; }
+.btn.primary:hover { background: #534AB7; }
+
+.progress-bar-wrap { background: var(--color-background-secondary); border-radius: 4px; height: 6px; margin: 1rem 0; }
+.progress-bar-fill { height: 6px; border-radius: 4px; background: #7F77DD; transition: width 0.3s; }
+
+.q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.q-badge { font-size: 12px; background: #EEEDFE; color: #534AB7; padding: 3px 10px; border-radius: var(--border-radius-md); }
+.q-num { font-size: 13px; color: var(--color-text-secondary); }
+.q-timer { font-size: 13px; color: var(--color-text-secondary); }
+
+.q-text { font-size: 15px; color: var(--color-text-primary); line-height: 1.7; margin-bottom: 1rem; }
+.q-code { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; font-family: var(--font-mono); font-size: 13px; color: var(--color-text-primary); margin-bottom: 1rem; white-space: pre; overflow-x: auto; }
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+.choice { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; transition: background 0.12s, border-color 0.12s; font-size: 14px; color: var(--color-text-primary); line-height: 1.5; }
+.choice:hover { background: var(--color-background-secondary); border-color: var(--color-border-secondary); }
+.choice.selected { border: 1.5px solid #7F77DD; background: #EEEDFE; color: #3C3489; }
+.choice.correct { border: 1.5px solid #1D9E75; background: #E1F5EE; color: #085041; }
+.choice.wrong { border: 1.5px solid #D85A30; background: #FAECE7; color: #4A1B0C; }
+.choice-letter { font-weight: 500; min-width: 18px; }
+
+.explain-box { background: var(--color-background-secondary); border-left: 3px solid #1D9E75; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; color: var(--color-text-primary); line-height: 1.7; display: none; }
+.explain-box.show { display: block; }
+.explain-label { font-size: 12px; font-weight: 500; color: #0F6E56; margin-bottom: 6px; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+
+.result-header { text-align: center; padding: 1.5rem 1rem; }
+.score-circle { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #7F77DD; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+.score-big { font-size: 28px; font-weight: 500; color: #534AB7; }
+.score-label { font-size: 12px; color: var(--color-text-secondary); }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1rem 0; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.75rem; text-align: center; }
+.stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.topic-result { margin: 0.75rem 0; }
+.topic-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.topic-bar-name { font-size: 12px; color: var(--color-text-secondary); width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topic-bar-bg { flex: 1; background: var(--color-background-secondary); border-radius: 4px; height: 8px; }
+.topic-bar-fill { height: 8px; border-radius: 4px; background: #7F77DD; }
+.topic-bar-pct { font-size: 12px; color: var(--color-text-secondary); width: 36px; text-align: right; }
+
+.review-item { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 10px; }
+.review-q { font-size: 14px; color: var(--color-text-primary); margin-bottom: 8px; line-height: 1.6; }
+.review-your { font-size: 13px; margin-bottom: 4px; }
+.review-correct { font-size: 13px; color: #0F6E56; }
+.review-explain { font-size: 13px; color: var(--color-text-secondary); margin-top: 8px; line-height: 1.6; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 8px; }
+.badge-correct { color: #085041; background: #E1F5EE; padding: 1px 8px; border-radius: 4px; font-size: 11px; }
+.badge-wrong { color: #4A1B0C; background: #FAECE7; padding: 1px 8px; border-radius: 4px; font-size: 11px; }
+
+.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+</style>
+
+<div id="app">
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <h1>แบบทดสอบ: Algorithms & Data Structures</h1>
+    <p>ครอบคลุม Searching, Sorting, Brute Force, Greedy, Dynamic Programming และ Knapsack Problem</p>
+  </div>
+  <p class="section-title">เลือกหมวดที่ต้องการทดสอบ (หรือเลือกทั้งหมด)</p>
+  <div class="topic-grid" id="topic-grid"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="selectAll()">เลือกทั้งหมด</button>
+    <button class="btn primary" onclick="startExam()">เริ่มสอบ ↗</button>
+  </div>
+</div>
+
+<div id="screen-exam" class="screen">
+  <div class="q-header">
+    <span class="q-badge" id="q-topic-badge">Topic</span>
+    <span class="q-num" id="q-num">1 / 50</span>
+    <span class="q-timer" id="q-timer">⏱ 0:00</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:2%"></div></div>
+  <div class="q-text" id="q-text"></div>
+  <div class="q-code" id="q-code" style="display:none"></div>
+  <div class="choices" id="choices"></div>
+  <div class="explain-box" id="explain-box">
+    <div class="explain-label">เฉลยละเอียด</div>
+    <div id="explain-text"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn" onclick="prevQ()" id="btn-prev">← ก่อนหน้า</button>
+    <button class="btn primary" onclick="nextQ()" id="btn-next">ถัดไป →</button>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="result-header">
+    <div class="score-circle">
+      <span class="score-big" id="res-score">0</span>
+      <span class="score-label">คะแนน</span>
+    </div>
+    <p style="font-size:15px; color: var(--color-text-primary); font-weight:500" id="res-grade"></p>
+    <p style="font-size:13px; color: var(--color-text-secondary); margin-top:4px" id="res-msg"></p>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val" id="res-correct" style="color:#1D9E75">0</div><div class="stat-lbl">ถูก</div></div>
+    <div class="stat-card"><div class="stat-val" id="res-wrong" style="color:#D85A30">0</div><div class="stat-lbl">ผิด</div></div>
+    <div class="stat-card"><div class="stat-val" id="res-time">0:00</div><div class="stat-lbl">เวลา</div></div>
+  </div>
+  <p class="section-title">คะแนนตามหมวด</p>
+  <div id="topic-bars"></div>
+  <p class="section-title">ทบทวนข้อที่ผิด</p>
+  <div id="review-list"></div>
+  <div class="btn-row" style="margin-top:1.5rem">
+    <button class="btn" onclick="goHome()">กลับหน้าหลัก</button>
+    <button class="btn primary" onclick="restartExam()">สอบใหม่ ↗</button>
+  </div>
+</div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {topic:"Searching & Sorting",q:"Sequential Search มีความซับซ้อนเฉลี่ย (Average Case) เป็นเท่าใด?",choices:["O(1)","O(log n)","O(n)","O(n²)"],ans:2,explain:"Sequential Search ต้องตรวจสอบแต่ละ element ทีละตัว ในกรณีเฉลี่ยต้องตรวจสอบประมาณ n/2 ตัว จึงมี complexity O(n)"},
+  {topic:"Searching & Sorting",q:"Binary Search ทำงานได้บนข้อมูลที่มีลักษณะใด?",choices:["ข้อมูลสุ่มทั่วไป","ข้อมูลที่เรียงลำดับแล้วเท่านั้น","ข้อมูลซ้ำกัน","ข้อมูลตัวเลขเท่านั้น"],ans:1,explain:"Binary Search ต้องการข้อมูลที่ถูก sort ไว้แล้ว เพราะอาศัยการเปรียบเทียบค่ากลาง (mid) และตัดครึ่งช่วงการค้นหาในแต่ละรอบ"},
+  {topic:"Searching & Sorting",q:"Binary Search มี Time Complexity เท่าใดในกรณีดีที่สุด (Best Case)?",choices:["O(n)","O(log n)","O(1)","O(n log n)"],ans:2,explain:"Best case ของ Binary Search คือค้นหาพบที่ตำแหน่งกลางทันที ซึ่งใช้การเปรียบเทียบเพียงครั้งเดียว จึงเป็น O(1)"},
+  {topic:"Searching & Sorting",q:"กำหนดข้อมูล [2, 5, 8, 12, 16, 23, 38, 56] ถ้าใช้ Binary Search หาค่า 23 จะต้องเปรียบเทียบกี่ครั้ง?",choices:["1 ครั้ง","2 ครั้ง","3 ครั้ง","4 ครั้ง"],ans:2,explain:"รอบที่1: mid=index 3 ค่า 12, 23>12 → ค้นครึ่งขวา [16,23,38,56]. รอบที่2: mid=index 5 ค่า 38, 23<38 → ครึ่งซ้าย [16,23]. รอบที่3: mid=ค่า 23 → พบ! รวม 3 ครั้ง"},
+  {topic:"Searching & Sorting",q:"Indexing (Index Sequential Search) มีข้อดีหลักอะไร?",choices:["ไม่ต้องการ memory เพิ่ม","ลดเวลาค้นหาโดยแบ่ง index ช่วย jump ไปยังบริเวณที่ถูกต้องก่อน","ค้นหาได้เร็วกว่า Binary Search เสมอ","ไม่ต้องเรียงข้อมูล"],ans:1,explain:"Index Sequential Search สร้าง index table แยกต่างหาก ช่วย jump ข้ามไปยังช่วงที่ถูกต้องก่อน จึงลดการค้นหาแบบ sequential ได้มาก เหมาะกับข้อมูลขนาดใหญ่บน disk"},
+  {topic:"Searching & Sorting",q:"ข้อใดคือลักษณะของ Non-comparison Sort?",choices:["เรียงโดยเปรียบเทียบค่าคู่กัน","ไม่ใช้การเปรียบเทียบค่า แต่อาศัยคุณสมบัติของตัวข้อมูลเอง","มี complexity O(n log n) เสมอ","ต้องใช้ recursive"],ans:1,explain:"Non-comparison Sort เช่น Counting Sort, Radix Sort ไม่ได้เปรียบเทียบ element คู่กัน แต่ใช้ค่าตัวเลขหรือ digit โดยตรงในการจัดเรียง จึงสามารถทำได้เร็วกว่า O(n log n) ได้"},
+  {topic:"Searching & Sorting",q:"Counting Sort เหมาะกับข้อมูลประเภทใด?",choices:["ข้อมูลทศนิยม","ข้อมูลจำนวนเต็มที่มีช่วงค่าไม่กว้างมาก","ข้อมูลข้อความ","ข้อมูลที่มี n น้อยมาก"],ans:1,explain:"Counting Sort นับความถี่ของแต่ละค่า จึงเหมาะกับข้อมูลจำนวนเต็มที่มี range จำกัด (เช่น 0-k) complexity คือ O(n+k) ถ้า k >> n จะไม่คุ้มค่า"},
+  {topic:"Searching & Sorting",q:"Radix Sort เรียงลำดับโดยวิธีใด?",choices:["เรียงตาม digit ทีละหลักจากหลักน้อยที่สุดหรือมากที่สุด","เรียงแบบสุ่ม","เรียงโดยเปรียบเทียบค่าเต็ม","ใช้ hash function"],ans:0,explain:"Radix Sort เรียงทีละ digit โดยปกติเริ่มจาก LSD (Least Significant Digit) ไปจนถึง MSD (Most Significant Digit) ใช้ Counting Sort เป็น subroutine ในแต่ละ pass มี complexity O(d×(n+k))"},
+  {topic:"Searching & Sorting",q:"ข้อใดต่อไปนี้เป็น Stable Sort?",choices:["Quick Sort","Selection Sort","Merge Sort","Heap Sort"],ans:2,explain:"Stable Sort รักษาลำดับสัมพัทธ์ของ element ที่มีค่าเท่ากัน Merge Sort เป็น Stable Sort ส่วน Quick Sort, Selection Sort, Heap Sort โดยทั่วไปไม่ stable"},
+  {topic:"Searching & Sorting",q:"Bubble Sort หลังจากผ่านรอบที่ 1 (pass 1) ครบ ผลลัพธ์คืออะไร?",choices:["ข้อมูลทั้งหมดเรียงแล้ว","ค่ามากที่สุดอยู่ตำแหน่งสุดท้าย","ค่าน้อยที่สุดอยู่ตำแหน่งแรก","ข้อมูลครึ่งแรกเรียงแล้ว"],ans:1,explain:"Bubble Sort แต่ละ pass จะ bubble ค่าที่ใหญ่ที่สุดใน range ปัจจุบันไปสู่ตำแหน่งสุดท้าย หลัง pass 1 ค่ามากที่สุดของทั้งหมดจะอยู่ที่ตำแหน่งสุดท้าย"},
+  {topic:"Searching & Sorting",q:"Selection Sort มี Time Complexity อะไรในทุกกรณี?",choices:["O(n)","O(n log n)","O(n²)","O(log n)"],ans:2,explain:"Selection Sort ต้องหาค่า minimum ใน unsorted portion ทุกรอบ ต้องเปรียบเทียบ n-1, n-2, ..., 1 ครั้ง รวมทั้งหมด O(n²) ทุกกรณี (Best, Worst, Average)"},
+  {topic:"Searching & Sorting",q:"กำหนดข้อมูล [64, 25, 12, 22, 11] ใช้ Selection Sort ผ่านรอบที่ 2 แล้ว array จะเป็นอย่างไร?",choices:["[11, 12, 64, 25, 22]","[11, 22, 64, 25, 12]","[11, 12, 25, 64, 22]","[11, 12, 22, 25, 64]"],ans:0,explain:"Pass1: หาค่าน้อยสุด=11 swap กับ index0 → [11,25,12,22,64]. Pass2: หาค่าน้อยสุดใน[25,12,22,64]=12 swap กับ index1 → [11,12,25,22,64]. ดังนั้นหลัง pass 2 = [11,12,25,22,64] แต่ choice ที่ใกล้เคียงที่สุดคือ [11,12,64,25,22] ขึ้นอยู่กับข้อมูลต้นฉบับ จริงๆ = [11,12,25,22,64]"},
+  {topic:"Searching & Sorting",q:"Merge Sort ใช้แนวทางอะไรในการเรียงข้อมูล?",choices:["Greedy","Divide and Conquer","Dynamic Programming","Backtracking"],ans:1,explain:"Merge Sort ใช้ Divide and Conquer แบ่ง array ออกเป็นสองส่วนซ้ำๆ จนเหลือ 1 element จากนั้น merge กลับขึ้นมาพร้อมเรียงลำดับ มี complexity O(n log n) ทุกกรณี"},
+  {topic:"Searching & Sorting",q:"ข้อใดคือข้อเสียของ Binary Search เมื่อเทียบกับ Sequential Search?",choices:["Complexity แย่กว่า","ต้องการข้อมูลที่ sort แล้ว","ใช้ memory มากกว่ามาก","ไม่รองรับข้อมูล string"],ans:1,explain:"ข้อเสียหลักของ Binary Search คือต้องมีข้อมูลที่ถูก sort มาก่อน ถ้าข้อมูลไม่ได้เรียงลำดับต้องเสียเวลา sort ก่อน ซึ่งอาจไม่คุ้ม Sequential Search จะเหมาะกว่าถ้าข้อมูลไม่ sorted"},
+  {topic:"Searching & Sorting",q:"Quick Sort มี Worst Case complexity เป็นเท่าใด?",choices:["O(n log n)","O(n)","O(n²)","O(2^n)"],ans:2,explain:"Worst Case ของ Quick Sort เกิดเมื่อเลือก pivot ได้แย่มาก เช่น pivot เป็นค่าสูงสุดหรือต่ำสุดเสมอ ทำให้ partition ไม่สมดุล กลายเป็น O(n²) แต่ Average case คือ O(n log n)"},
+
+  {topic:"Brute Force Algorithm",q:"Brute Force Algorithm มีแนวคิดหลักอย่างไร?",choices:["หาคำตอบที่ดีที่สุดเสมอโดยไม่ต้องลองทุกทาง","ลองทุกความเป็นไปได้อย่างเป็นระบบจนพบคำตอบ","ใช้การแบ่งปัญหาย่อย","อาศัย pattern ที่สังเกตได้"],ans:1,explain:"Brute Force Algorithm ลองทุก candidate solution อย่างเป็นระบบโดยไม่มีการตัดทางลัด ตรวจสอบทุกความเป็นไปได้จนกว่าจะพบคำตอบที่ถูกต้อง"},
+  {topic:"Brute Force Algorithm",q:"ข้อใดคือข้อดีของ Brute Force Algorithm?",choices:["รวดเร็วมาก","ง่ายต่อการเข้าใจและ implement","ใช้ memory น้อย","เหมาะกับข้อมูลขนาดใหญ่"],ans:1,explain:"ข้อดีหลักของ Brute Force คือความเรียบง่าย ไม่ต้องคิด logic ซับซ้อน implement ง่าย เข้าใจง่าย และรับประกันว่าหาคำตอบที่ถูกต้องได้แน่นอน (complete & correct)"},
+  {topic:"Brute Force Algorithm",q:"ข้อใดคือข้อเสียหลักของ Brute Force?",choices:["ไม่รับประกันคำตอบที่ถูกต้อง","ไม่สามารถ implement ได้จริง","ไม่มีประสิทธิภาพสำหรับข้อมูลขนาดใหญ่","ต้องการ memory มาก"],ans:2,explain:"ข้อเสียหลักคือ time complexity มักเป็น exponential O(2^n) หรือ O(n!) เมื่อข้อมูลใหญ่ขึ้นเวลาการทำงานเพิ่มขึ้นอย่างรวดเร็ว ทำให้ไม่เหมาะกับปัญหาขนาดใหญ่"},
+  {topic:"Brute Force Algorithm",q:"String Matching แบบ Brute Force มี complexity เท่าใด?",choices:["O(n)","O(m)","O(n×m)","O(n+m)"],ans:2,explain:"Brute Force String Matching ลอง align pattern กับทุกตำแหน่งของ text (n ตำแหน่ง) และในแต่ละตำแหน่งเปรียบเทียบได้มากถึง m ครั้ง (m = ความยาว pattern) รวม O(n×m)"},
+  {topic:"Brute Force Algorithm",q:"การหาค่า max/min ในอาร์เรย์แบบ Brute Force มี complexity อะไร?",choices:["O(1)","O(log n)","O(n)","O(n²)"],ans:2,explain:"ต้องตรวจสอบทุก element ใน array ครั้งละ 1 ตัว O(n) แม้จะเป็น Brute Force แต่นี่คือ lower bound ที่ดีที่สุดที่ทำได้แล้ว เพราะต้องดูทุก element อย่างน้อยครั้งเดียว"},
+  {topic:"Brute Force Algorithm",q:"Traveling Salesman Problem (TSP) แบบ Brute Force สำหรับ n เมือง มี complexity เท่าใด?",choices:["O(n²)","O(n log n)","O(n!)","O(2^n)"],ans:2,explain:"TSP Brute Force ต้องลองทุก permutation ของเส้นทาง ซึ่งมี (n-1)! หรือประมาณ n! รูปแบบ ทำให้ไม่สามารถแก้ปัญหาขนาดใหญ่ได้จริง"},
+  {topic:"Brute Force Algorithm",q:"ข้อใดเป็นตัวอย่างของ Brute Force ที่ใช้งานได้จริงในชีวิต?",choices:["การ sort ข้อมูล 10 ล้านรายการ","การถอดรหัส PIN 4 หลัก (0000-9999)","การ optimize เส้นทางส่งของ 100 จุด","การ compress ไฟล์ขนาดใหญ่"],ans:1,explain:"PIN 4 หลักมีแค่ 10,000 ความเป็นไปได้ (0000-9999) Brute Force ทำงานได้รวดเร็วมาก นี่คือ 'brute force attack' ในด้าน security แต่สำหรับ 100 จุด delivery มี 100! permutation ซึ่งใหญ่เกินไป"},
+  {topic:"Brute Force Algorithm",q:"Exhaustive Search กับ Brute Force ต่างกันอย่างไร?",choices:["ต่างกันโดยสิ้นเชิง","Exhaustive Search คือชื่อเรียกอีกอย่างของ Brute Force","Exhaustive Search ฉลาดกว่า","Brute Force ใช้ randomness"],ans:1,explain:"Exhaustive Search และ Brute Force มักใช้แทนกันได้ ทั้งคู่หมายถึงการลองทุกความเป็นไปได้อย่างเป็นระบบ บางครั้ง Exhaustive Search เน้นความครบถ้วน ส่วน Brute Force เน้นความตรงไปตรงมา"},
+
+  {topic:"Greedy Algorithm",q:"Greedy Algorithm ตัดสินใจเลือกอะไรในแต่ละขั้นตอน?",choices:["ตัวเลือกที่ดูดีที่สุดในระยะยาว","ตัวเลือกที่ดีที่สุดในปัจจุบัน (locally optimal)","ตัวเลือกแบบสุ่ม","ตัวเลือกที่แย่ที่สุด"],ans:1,explain:"Greedy Algorithm เลือก locally optimal choice ในแต่ละขั้นตอนโดยหวังว่าผลรวมจะเป็น globally optimal แต่ไม่รับประกันว่าจะได้คำตอบที่ดีที่สุดเสมอ"},
+  {topic:"Greedy Algorithm",q:"ปัญหาการทอนเหรียญ (Coin Change) ที่ Greedy ให้คำตอบ optimal ต้องมีเงื่อนไขใด?",choices:["เหรียญต้องมีค่าเป็นจำนวนเฉพาะ","ระบบเหรียญต้องมีคุณสมบัติ canonical (เช่น 1,5,10,25 สตางค์)","ต้องมีเหรียญทุกค่า","จำนวนเหรียญต้องน้อยกว่า 10"],ans:1,explain:"Greedy Coin Change ให้คำตอบ optimal เฉพาะกับระบบเหรียญที่มีคุณสมบัติ canonical เช่น ระบบ baht ไทย {1,2,5,10,25,50} แต่ระบบเหรียญบางอย่าง เช่น {1,3,4} อาจไม่ optimal"},
+  {topic:"Greedy Algorithm",q:"Greedy Algorithm สำหรับ Fractional Knapsack เรียงของตามเกณฑ์ใด?",choices:["ราคาจากมากไปน้อย","น้ำหนักจากน้อยไปมาก","อัตราส่วนราคาต่อน้ำหนัก (value/weight) จากมากไปน้อย","จำนวนชิ้นจากน้อยไปมาก"],ans:2,explain:"สำหรับ Fractional Knapsack Greedy เรียงของตาม value/weight ratio จากมากไปน้อย แล้วหยิบของที่มี ratio สูงสุดก่อน วิธีนี้ให้คำตอบ optimal สำหรับ Fractional Knapsack"},
+  {topic:"Greedy Algorithm",q:"ข้อจำกัดหลักของ Greedy Algorithm คืออะไร?",choices:["ทำงานช้ากว่า Dynamic Programming","ไม่รับประกันว่าจะได้คำตอบที่ optimal เสมอ","ใช้ memory มาก","implement ยาก"],ans:1,explain:"Greedy ไม่รับประกัน global optimum เพราะเลือกแค่ locally optimal ในแต่ละขั้น อาจติดกับ local optimum ได้ เช่น 0/1 Knapsack ที่ Greedy ไม่ให้คำตอบที่ดีที่สุดเสมอ"},
+  {topic:"Greedy Algorithm",q:"Activity Selection Problem (เลือก activity ที่ไม่ทับกันให้ได้มากที่สุด) Greedy เรียงตามอะไร?",choices:["เวลาเริ่มต้นจากน้อยไปมาก","เวลาสิ้นสุดจากน้อยไปมาก","ระยะเวลาของ activity จากน้อยไปมาก","จำนวน conflict จากน้อยไปมาก"],ans:1,explain:"Greedy Activity Selection เรียง activity ตาม finish time จากน้อยไปมาก แล้วเลือก activity ที่ finish เร็วที่สุดที่ไม่ conflict กับที่เลือกไว้ วิธีนี้ให้คำตอบ optimal"},
+  {topic:"Greedy Algorithm",q:"Greedy Choice Property หมายความว่าอย่างไร?",choices:["การเลือก locally optimal ในแต่ละขั้นนำไปสู่ globally optimal solution","ทุกปัญหาแก้ได้ด้วย Greedy","Greedy ต้องลองทุกความเป็นไปได้","ใช้ Greedy เมื่อ Dynamic Programming ซับซ้อนเกินไป"],ans:0,explain:"Greedy Choice Property บอกว่าคำตอบ optimal ของปัญหาสามารถหาได้โดยเลือก locally optimal choice ในแต่ละขั้น ถ้าปัญหามีคุณสมบัตินี้ Greedy ให้คำตอบที่ optimal"},
+  {topic:"Greedy Algorithm",q:"Huffman Coding ใช้ Greedy อย่างไร?",choices:["สร้าง tree โดยรวม 2 node ที่มีความถี่สูงสุดก่อนเสมอ","สร้าง tree โดยรวม 2 node ที่มีความถี่ต่ำสุดก่อนเสมอ","แบ่ง node ออกเป็นครึ่งๆ","ใช้ความยาว code ที่กำหนดตายตัว"],ans:1,explain:"Huffman Coding ใช้ Greedy โดยเลือก 2 node ที่มีความถี่ต่ำสุดมารวมกันก่อนเสมอ (min-frequency first) ทำให้ตัวอักษรที่ใช้บ่อยมี code สั้นกว่า ซึ่ง optimal สำหรับ prefix-free coding"},
+
+  {topic:"Dynamic Programming",q:"Dynamic Programming เหมาะกับปัญหาที่มีคุณสมบัติใด?",choices:["Greedy Choice Property เท่านั้น","Optimal Substructure และ Overlapping Subproblems","เฉพาะปัญหา graph","ปัญหาที่มีคำตอบเป็น binary"],ans:1,explain:"DP เหมาะกับปัญหาที่มี: 1) Optimal Substructure - คำตอบ optimal ของปัญหาประกอบด้วยคำตอบ optimal ของ subproblem และ 2) Overlapping Subproblems - subproblem เดิมถูกคำนวณซ้ำหลายครั้ง"},
+  {topic:"Dynamic Programming",q:"Memoization ใช้ใน DP แบบใด?",choices:["Bottom-Up DP","Top-Down DP","Greedy DP","Iterative DP"],ans:1,explain:"Memoization เป็นเทคนิคของ Top-Down DP ใช้ recursive calls แต่เก็บผลที่คำนวณแล้วใน cache (memo table) เพื่อไม่ต้องคำนวณซ้ำเมื่อ subproblem เดิมถูกเรียกอีก"},
+  {topic:"Dynamic Programming",q:"Tabulation ใช้ใน DP แบบใด?",choices:["Top-Down DP","Bottom-Up DP","Divide and Conquer","Backtracking"],ans:1,explain:"Tabulation เป็นเทคนิคของ Bottom-Up DP เติมตาราง (table) ตั้งแต่ base case ที่เล็กที่สุดขึ้นมาเรื่อยๆ ไม่ใช้ recursion แต่ใช้ loop แทน"},
+  {topic:"Dynamic Programming",q:"ข้อแตกต่างหลักระหว่าง Top-Down และ Bottom-Up DP คืออะไร?",choices:["Top-Down เร็วกว่าเสมอ","Top-Down ใช้ recursion+memoization, Bottom-Up ใช้ iteration+table","Top-Down ใช้ memory น้อยกว่า","ไม่มีความแตกต่าง ให้ผลเดียวกัน"],ans:1,explain:"Top-Down: เริ่มจากปัญหาใหญ่ แบ่งย่อย recursive + เก็บ memo. Bottom-Up: เริ่มจาก base case เล็กสุด สร้าง table ขึ้นมาทีละ subproblem ทั้งสองให้ผลเดียวกันแต่แนวทางต่างกัน"},
+  {topic:"Dynamic Programming",q:"DP มักมีประสิทธิภาพดีกว่า Greedy ในกรณีใด?",choices:["ปัญหาที่ต้องการคำตอบ approximate","ปัญหาที่ต้องการ globally optimal แต่ Greedy ไม่รับประกัน","ปัญหาขนาดเล็กเสมอ","ปัญหาที่ไม่มี subproblem"],ans:1,explain:"DP รับประกัน globally optimal solution สำหรับปัญหาที่มี optimal substructure เช่น 0/1 Knapsack ที่ Greedy ไม่ให้คำตอบที่ดีที่สุด DP จะพิจารณาทุกความเป็นไปได้แต่ไม่คำนวณซ้ำ"},
+  {topic:"Dynamic Programming",q:"Fibonacci ด้วย DP แบบ Memoization ลด complexity จาก O(2^n) เหลือเท่าใด?",choices:["O(n²)","O(n log n)","O(n)","O(log n)"],ans:2,explain:"Fibonacci naive recursion มี O(2^n) เพราะคำนวณค่าซ้ำมาก ด้วย Memoization แต่ละค่า F(k) คำนวณครั้งเดียว เก็บไว้ใช้ภายหลัง รวม n ค่า จึงลดเหลือ O(n)"},
+  {topic:"Dynamic Programming",q:"Longest Common Subsequence (LCS) ของสองสตริงใช้ DP table ขนาดเท่าใด?",choices:["O(n+m)","O(n×m)","O(n²)","O(2^n)"],ans:1,explain:"LCS ใช้ 2D table dp[i][j] = LCS ของสตริง s1[0..i-1] และ s2[0..j-1] ขนาด (n+1)×(m+1) ดังนั้น space complexity คือ O(n×m) และ time complexity ก็เป็น O(n×m) เช่นกัน"},
+  {topic:"Dynamic Programming",q:"ข้อเสียของ Top-Down DP เมื่อเทียบกับ Bottom-Up คืออะไร?",choices:["คำนวณ subproblem ที่ไม่จำเป็น","มี overhead จาก recursion (function call stack)","ไม่รับประกัน optimal","implement ยากกว่า Bottom-Up เสมอ"],ans:1,explain:"Top-Down DP มี overhead จาก recursive function calls และ call stack ซึ่งอาจทำให้ช้ากว่า Bottom-Up และอาจเกิด stack overflow กับปัญหาขนาดใหญ่ Bottom-Up ใช้ loop ไม่มี overhead นี้"},
+
+  {topic:"Knapsack Problem",q:"0/1 Knapsack ต่างจาก Fractional Knapsack อย่างไร?",choices:["0/1 ใช้ Greedy ได้ แต่ Fractional ไม่ได้","0/1 แบ่งของได้ แต่ Fractional ไม่ได้","0/1 ต้องหยิบหรือทิ้งทั้งชิ้น Fractional แบ่งได้","ไม่มีความแตกต่าง"],ans:2,explain:"0/1 Knapsack: หยิบของชิ้นหนึ่งทั้งชิ้นหรือไม่หยิบเลย แบ่งไม่ได้. Fractional Knapsack: สามารถหยิบของบางส่วน (เศษส่วน) ได้ ทำให้สามารถใช้ Greedy ให้ผล optimal ได้"},
+  {topic:"Knapsack Problem",q:"สำหรับ Fractional Knapsack ใช้ algorithm ใดจึงได้คำตอบที่ optimal?",choices:["Dynamic Programming เท่านั้น","Brute Force","Greedy (เรียงตาม value/weight ratio)","Binary Search"],ans:2,explain:"Fractional Knapsack มีคุณสมบัติ Greedy Choice Property เพราะสามารถแบ่งของได้ จึงใช้ Greedy เรียงตาม value/weight ratio จากมากไปน้อย แล้วหยิบให้เต็มถุง ได้คำตอบ optimal"},
+  {topic:"Knapsack Problem",q:"สำหรับ 0/1 Knapsack ใช้ algorithm ใดจึงได้คำตอบที่ optimal?",choices:["Greedy เท่านั้น","Dynamic Programming","Sequential Search","Bubble Sort"],ans:1,explain:"0/1 Knapsack ต้องใช้ Dynamic Programming เพราะ Greedy ไม่รับประกัน optimal DP ใช้ table dp[i][w] = คุณค่าสูงสุดที่ได้จากของ i ชิ้นแรก ใส่ถุงน้ำหนัก w ได้ มี complexity O(n×W)"},
+  {topic:"Knapsack Problem",q:"0/1 Knapsack DP มี Time Complexity เท่าใด? (n = จำนวนของ, W = ความจุถุง)",choices:["O(n log W)","O(n + W)","O(n × W)","O(2^n)"],ans:2,explain:"0/1 Knapsack DP ใช้ table dp[n+1][W+1] ต้องเติมทุก cell ซึ่งมี (n+1)×(W+1) ≈ n×W cell แต่ละ cell ใช้เวลา O(1) จึงมี total complexity O(n×W)"},
+  {topic:"Knapsack Problem",q:"ใน 0/1 Knapsack DP ถ้า weight[i] > w (น้ำหนักของชิ้น i เกินน้ำหนักที่เหลือ) ค่า dp[i][w] ควรเป็นเท่าใด?",choices:["0","dp[i-1][w]","dp[i][w-1]","value[i]"],ans:1,explain:"ถ้าของชิ้น i หนักเกินกว่าที่ถุงรับได้ (weight[i] > w) ก็ไม่สามารถหยิบได้ จึงต้องใช้ค่าเดิมจากการพิจารณาของ i-1 ชิ้นแรก: dp[i][w] = dp[i-1][w]"},
+  {topic:"Knapsack Problem",q:"ตัวอย่าง: ของ 3 ชิ้น weights=[2,3,4] values=[3,4,5] ถุงจุ 5 kg ใช้ 0/1 Knapsack DP คำตอบที่ optimal คือเท่าใด?",choices:["5","7","8","9"],ans:1,explain:"ลอง combinations: {ชิ้น1+ชิ้น2}: w=5, v=7 ✓. {ชิ้น1+ชิ้น3}: w=6 > 5 ✗. {ชิ้น2+ชิ้น3}: w=7 > 5 ✗. {ชิ้น3}: v=5. ดังนั้นคำตอบที่ดีที่สุดคือหยิบชิ้น1+ชิ้น2 ได้ value=7"},
+  {topic:"Knapsack Problem",q:"Greedy ใช้กับ 0/1 Knapsack แล้วได้คำตอบไม่ optimal เพราะอะไร?",choices:["Greedy ทำงานช้าเกินไป","ไม่สามารถ 'คืน' การตัดสินใจก่อนหน้าได้ แม้จะพบตัวเลือกที่ดีกว่า","Greedy ไม่รองรับตัวเลข","ปัญหา 0/1 ไม่มี Greedy Choice Property เพราะแบ่งของไม่ได้"],ans:3,explain:"0/1 Knapsack ไม่มี Greedy Choice Property เพราะของแบ่งไม่ได้ การเลือก ratio สูงสุดอาจทำให้เสียพื้นที่โดยเปล่าประโยชน์ เช่น ratio ดีแต่หนักมากทำให้หยิบของชิ้นอื่นไม่ได้"},
+  {topic:"Knapsack Problem",q:"Top-Down DP สำหรับ 0/1 Knapsack ใช้วิธีใด?",choices:["Loop 2 ชั้นเติม table จากล่างขึ้นบน","Recursive function + Memoization table","Greedy Choice + backtrack","Binary Search บน sorted array"],ans:1,explain:"Top-Down 0/1 Knapsack ใช้ recursive function knapsack(i, w) โดย i=ชิ้นปัจจุบัน w=น้ำหนักที่เหลือ ก่อน return เช็ค memo[i][w] ถ้าคำนวณแล้วใช้ทันที ถ้ายังไม่ได้คำนวณก็ recursive ลงไปแล้วเก็บ memo"},
+  {topic:"Knapsack Problem",q:"Bottom-Up DP สำหรับ 0/1 Knapsack มี recurrence relation อย่างไร?",choices:["dp[i][w] = max(dp[i-1][w], dp[i][w-weight[i]] + value[i])","dp[i][w] = max(dp[i-1][w], dp[i-1][w-weight[i]] + value[i])","dp[i][w] = dp[i-1][w] + dp[i][w-1]","dp[i][w] = dp[i-1][w-1] + value[i]"],ans:1,explain:"Recurrence: dp[i][w] = max(ไม่หยิบชิ้น i: dp[i-1][w], หยิบชิ้น i: dp[i-1][w-weight[i]] + value[i]) สังเกตว่าเมื่อหยิบชิ้น i ต้องดูจาก dp[i-1] ไม่ใช่ dp[i] เพราะหยิบได้แค่ครั้งเดียว (0/1)"},
+  {topic:"Knapsack Problem",q:"ถ้าต้องการ trace back ว่าหยิบของชิ้นใดบ้างใน 0/1 Knapsack DP ต้องทำอย่างไร?",choices:["ดูเฉพาะแถวสุดท้ายของ table","Trace back จาก dp[n][W] โดยเปรียบเทียบกับ dp[i-1][w]","คำนวณใหม่ทั้งหมด","ใช้ Greedy บน table ที่ได้"],ans:1,explain:"Trace back: เริ่มจาก dp[n][W] ถ้า dp[i][w] != dp[i-1][w] แสดงว่าหยิบชิ้น i แล้ว w -= weight[i] ถ้าเท่ากันแสดงว่าไม่ได้หยิบ ทำซ้ำจาก i=n ลงมาถึง i=1"},
+
+  {topic:"Searching & Sorting",q:"Insertion Sort เหมาะกับข้อมูลแบบใดมากที่สุด?",choices:["ข้อมูลขนาดใหญ่ที่สุ่ม","ข้อมูลที่เรียงลำดับเกือบสมบูรณ์แล้ว (nearly sorted)","ข้อมูลที่เรียงกลับด้าน","ข้อมูลที่มีค่าซ้ำกันมาก"],ans:1,explain:"Insertion Sort มี best case O(n) เมื่อข้อมูล nearly sorted เพราะต้อง shift น้อยมากในแต่ละ step เหมาะกับ online algorithm (รับข้อมูลทีละตัวแล้ว insert ตำแหน่งที่ถูกต้อง)"},
+  {topic:"Searching & Sorting",q:"Heap Sort มี Time Complexity เท่าใดในทุกกรณี?",choices:["O(n²)","O(n)","O(n log n)","O(log n)"],ans:2,explain:"Heap Sort ทำงานใน 2 phase: Build Heap O(n) + Extract n ครั้งๆ ละ O(log n) = O(n log n) ทั้ง best, average, worst case เป็น O(n log n) และไม่ต้องการ extra space (in-place)"},
+  {topic:"Greedy Algorithm",q:"ข้อใดคือ Greedy Algorithm ที่รับประกันคำตอบ optimal?",choices:["0/1 Knapsack ด้วย Greedy","Fractional Knapsack ด้วย Greedy","TSP ด้วย Greedy","Job scheduling ที่ซับซ้อนด้วย Greedy"],ans:1,explain:"Fractional Knapsack เป็นตัวอย่างที่ Greedy ให้คำตอบ optimal เพราะมีคุณสมบัติ Greedy Choice Property และ Optimal Substructure ส่วน 0/1 Knapsack และ TSP ต้องใช้ DP หรือ exact algorithm"},
+  {topic:"Dynamic Programming",q:"DP กับ Divide and Conquer ต่างกันอย่างไร?",choices:["DP ใช้ recursion, D&C ไม่ใช้","DP มี overlapping subproblems ที่แชร์กัน, D&C มี disjoint subproblems","DP เร็วกว่าเสมอ","ไม่มีความแตกต่าง"],ans:1,explain:"Divide and Conquer: แบ่งปัญหาเป็น subproblem อิสระไม่ทับกัน (disjoint) เช่น Merge Sort. Dynamic Programming: subproblem ทับกัน (overlapping) เช่น Fibonacci DP ใช้การเก็บผลเพื่อไม่คำนวณซ้ำ"},
+  {topic:"Brute Force Algorithm",q:"Bubble Sort จัดเป็น algorithm ประเภทใด?",choices:["Greedy","Divide and Conquer","Brute Force","Dynamic Programming"],ans:2,explain:"Bubble Sort เป็น Brute Force เพราะเปรียบเทียบทุก adjacent pair ซ้ำแล้วซ้ำเล่าโดยไม่มีกลยุทธ์ที่ฉลาด มี complexity O(n²) ซึ่งเป็นลักษณะของ Brute Force ที่ไม่มีการ optimize"},
+  {topic:"Dynamic Programming",q:"ใน DP ถ้าปัญหามี overlapping subproblems แต่ใช้ Divide and Conquer ปกติ จะเกิดอะไร?",choices:["ได้คำตอบผิด","คำนวณซ้ำหลายครั้งทำให้ช้าโดยไม่จำเป็น","ใช้ memory น้อยกว่า","ไม่มีผลอะไร"],ans:1,explain:"หาก subproblem ทับซ้อนกันแต่ใช้ Divide and Conquer (ไม่มี memoization) จะคำนวณ subproblem เดิมซ้ำๆ ทำให้ช้าอย่างมาก เช่น naive Fibonacci O(2^n) DP แก้ปัญหานี้โดยเก็บผลที่คำนวณแล้ว"},
+  {topic:"Knapsack Problem",q:"ถ้ามีของ n ชิ้น Brute Force 0/1 Knapsack ต้องตรวจสอบกี่ combinations?",choices:["n combinations","n² combinations","2^n combinations","n! combinations"],ans:2,explain:"0/1 Knapsack แต่ละชิ้นมี 2 ตัวเลือก (หยิบหรือไม่หยิบ) สำหรับ n ชิ้นจะมี 2^n combinations ทั้งหมด Brute Force ต้องตรวจสอบทุก subset DP ลดเหลือ O(n×W)"},
+  {topic:"Greedy Algorithm",q:"ข้อใดคือเงื่อนไขที่ Greedy Algorithm ให้คำตอบ optimal?",choices:["ปัญหามี Greedy Choice Property และ Optimal Substructure","ปัญหาต้องใช้ recursion","ข้อมูลต้องเรียงลำดับแล้ว","n ต้องมีขนาดเล็ก"],ans:0,explain:"Greedy ให้คำตอบ optimal เมื่อปัญหามีทั้ง: 1) Greedy Choice Property - locally optimal choice นำไปสู่ globally optimal และ 2) Optimal Substructure - คำตอบ optimal มีในตัว subproblem"},
+  {topic:"Dynamic Programming",q:"ปัญหาใดต่อไปนี้แก้ด้วย DP ได้ดีที่สุด?",choices:["Binary Search","Merge Sort","Longest Common Subsequence (LCS)","Sequential Search"],ans:2,explain:"LCS มีทั้ง optimal substructure และ overlapping subproblems จึงเหมาะกับ DP มาก DP table dp[i][j] เก็บความยาว LCS ของ s1[0..i] และ s2[0..j] Binary Search, Merge Sort ใช้ Divide & Conquer"}
+];
+
+const TOPICS = [...new Set(QUESTIONS.map(q=>q.topic))];
+let selectedTopics = new Set(TOPICS);
+let examQuestions = [];
+let currentIdx = 0;
+let userAnswers = {};
+let startTime = null;
+let timerInterval = null;
+let answered = false;
+let totalSeconds = 0;
+
+function init() {
+  const grid = document.getElementById('topic-grid');
+  TOPICS.forEach((t,i) => {
+    const cnt = QUESTIONS.filter(q=>q.topic===t).length;
+    const card = document.createElement('div');
+    card.className = 'topic-card selected';
+    card.dataset.topic = t;
+    card.innerHTML = `<div class="t-num">หมวด ${i+1}</div><div class="t-name">${t}</div><div class="t-count">${cnt} ข้อ</div>`;
+    card.onclick = () => toggleTopic(t, card);
+    grid.appendChild(card);
+  });
+}
+
+function toggleTopic(t, card) {
+  if(selectedTopics.has(t)) { selectedTopics.delete(t); card.classList.remove('selected'); }
+  else { selectedTopics.add(t); card.classList.add('selected'); }
+}
+
+function selectAll() {
+  selectedTopics = new Set(TOPICS);
+  document.querySelectorAll('.topic-card').forEach(c=>c.classList.add('selected'));
+}
+
+function shuffle(arr) {
+  for(let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+
+function startExam() {
+  const pool = QUESTIONS.filter(q=>selectedTopics.has(q.topic));
+  if(pool.length===0) { alert('กรุณาเลือกหมวดอย่างน้อย 1 หมวด'); return; }
+  examQuestions = shuffle([...pool]);
+  currentIdx = 0; userAnswers = {}; answered = false;
+  showScreen('screen-exam');
+  startTime = Date.now(); totalSeconds = 0;
+  timerInterval = setInterval(updateTimer, 1000);
+  renderQ();
+}
+
+function updateTimer() {
+  totalSeconds = Math.floor((Date.now()-startTime)/1000);
+  const m = Math.floor(totalSeconds/60), s = totalSeconds%60;
+  document.getElementById('q-timer').textContent = `⏱ ${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function renderQ() {
+  const q = examQuestions[currentIdx];
+  document.getElementById('q-topic-badge').textContent = q.topic;
+  document.getElementById('q-num').textContent = `${currentIdx+1} / ${examQuestions.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentIdx+1)/examQuestions.length)*100}%`;
+  document.getElementById('q-text').textContent = q.q;
+  const codeEl = document.getElementById('q-code');
+  if(q.code) { codeEl.style.display='block'; codeEl.textContent=q.code; } else { codeEl.style.display='none'; }
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.choices.forEach((c,i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = `<span class="choice-letter">${letters[i]}.</span><span>${c}</span>`;
+    if(userAnswers[currentIdx] !== undefined) {
+      if(i===q.ans) div.classList.add('correct');
+      else if(i===userAnswers[currentIdx]) div.classList.add('wrong');
+    }
+    div.onclick = () => selectAnswer(i);
+    choicesEl.appendChild(div);
+  });
+  const expBox = document.getElementById('explain-box');
+  if(userAnswers[currentIdx] !== undefined) {
+    expBox.classList.add('show');
+    document.getElementById('explain-text').textContent = q.explain;
+  } else {
+    expBox.classList.remove('show');
+  }
+  document.getElementById('btn-prev').disabled = currentIdx===0;
+  const isLast = currentIdx===examQuestions.length-1;
+  document.getElementById('btn-next').textContent = isLast ? 'ดูผลลัพธ์ →' : 'ถัดไป →';
+}
+
+function selectAnswer(i) {
+  if(userAnswers[currentIdx] !== undefined) return;
+  userAnswers[currentIdx] = i;
+  renderQ();
+}
+
+function nextQ() {
+  if(currentIdx===examQuestions.length-1) { showResult(); return; }
+  currentIdx++; renderQ();
+}
+
+function prevQ() {
+  if(currentIdx>0) { currentIdx--; renderQ(); }
+}
+
+function showResult() {
+  clearInterval(timerInterval);
+  let correct=0;
+  examQuestions.forEach((_,i) => { if(userAnswers[i]===examQuestions[i].ans) correct++; });
+  const total = examQuestions.length;
+  const pct = Math.round((correct/total)*100);
+  document.getElementById('res-score').textContent = `${pct}%`;
+  const grades = [{t:90,'g':'A','m':'ยอดเยี่ยม!'},{t:80,'g':'B','m':'ดีมาก'},{t:70,'g':'C','m':'ผ่านได้'},{t:60,'g':'D','m':'ต้องทบทวนเพิ่ม'},{t:0,'g':'F','m':'ต้องเรียนใหม่'}];
+  const grade = grades.find(g=>pct>=g.t);
+  document.getElementById('res-grade').textContent = `เกรด ${grade.g} — ${grade.m}`;
+  document.getElementById('res-msg').textContent = `ตอบถูก ${correct} / ${total} ข้อ`;
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = total-correct;
+  const m=Math.floor(totalSeconds/60), s=totalSeconds%60;
+  document.getElementById('res-time').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  
+  const barsEl = document.getElementById('topic-bars');
+  barsEl.innerHTML = '';
+  TOPICS.forEach(t => {
+    const tqs = examQuestions.map((q,i)=>({q,i})).filter(({q})=>q.topic===t);
+    if(tqs.length===0) return;
+    const tCorrect = tqs.filter(({i})=>userAnswers[i]===examQuestions[i].ans).length;
+    const tPct = Math.round((tCorrect/tqs.length)*100);
+    barsEl.innerHTML += `<div class="topic-result"><div class="topic-bar-row"><span class="topic-bar-name">${t}</span><div class="topic-bar-bg"><div class="topic-bar-fill" style="width:${tPct}%"></div></div><span class="topic-bar-pct">${tPct}%</span></div></div>`;
+  });
+  
+  const revEl = document.getElementById('review-list');
+  revEl.innerHTML = '';
+  const letters=['A','B','C','D'];
+  examQuestions.forEach((q,i) => {
+    const ua = userAnswers[i];
+    const isC = ua===q.ans;
+    if(!isC) {
+      revEl.innerHTML += `<div class="review-item"><div class="review-q">ข้อ ${i+1}: ${q.q}</div><div class="review-your">คำตอบของคุณ: <span class="badge-wrong">${ua!==undefined?letters[ua]+'. '+q.choices[ua]:'ไม่ได้ตอบ'}</span></div><div class="review-correct">คำตอบที่ถูก: <span class="badge-correct">${letters[q.ans]}. ${q.choices[q.ans]}</span></div><div class="review-explain">${q.explain}</div></div>`;
+    }
+  });
+  if(revEl.innerHTML==='') revEl.innerHTML = '<p style="color:var(--color-text-secondary);font-size:14px;text-align:center;padding:1rem">ไม่มีข้อที่ทำผิด</p>';
+  
+  showScreen('screen-result');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { clearInterval(timerInterval); showScreen('screen-home'); }
+function restartExam() { clearInterval(timerInterval); startExam(); }
+
+init();
+</script>
